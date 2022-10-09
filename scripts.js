@@ -17,12 +17,15 @@ var os = require('os')
 var ms = require('ms')
 var timeZone = require('moment-timezone')
 var speedtest = require('performance-now')
+var ffmpeg = require('fluent-ffmpeg')
+var { Primbon } = require('scrape-primbon')
+var primbon = new Primbon()
 var { performance } = require('perf_hooks')
 var { JSDOM } = require('jsdom')
 var { spawn, exec, execSync } = require("child_process")
 
 // lib
-var { runtime, fetchJson, getBuffer, jsonformat, format, parseMention, smsg, formatp, tanggal, formatDate, getTime, isUrl, sleep, clockString, getRandom, getGroupAdmins } = require('./lib/myfunc')
+var { smsg, formatp, tanggal, formatDate, getTime, isUrl, sleep, clockString, runtime, fetchJson, getBuffer, jsonformat, format, parseMention, getRandom, getGroupAdmins } = require('./lib/myfunc')
 
 // Time
 var time = timeZone.tz('Asia/Jakarta')
@@ -38,10 +41,14 @@ module.exports = danzz = async (danzz, m, store, chatUpdate) => {
         const command = body.replace(prefix, '').trim().split(/ +/).shift().toLowerCase()
         const args = body.trim().split(/ +/).slice(1)
         const text = q = url = args.join(" ")
-        const from = m.chat
-        const quoted = m.quoted ? m.quoted : m
+        const fatkuns = (m.quoted || m)
+        const quoted = (fatkuns.mtype == 'buttonsMessage') ? fatkuns[Object.keys(fatkuns)[1]] : (fatkuns.mtype == 'templateMessage') ? fatkuns.hydratedTemplate[Object.keys(fatkuns.hydratedTemplate)[1]] : (fatkuns.mtype == 'product') ? fatkuns[Object.keys(fatkuns)[0]] : m.quoted ? m.quoted : m
         const mime = (quoted.msg || quoted).mimetype || ''
-        const isMedia = /image|video|sticker|audio/.test(mime)
+        const qmsg = (quoted.msg || quoted)
+        const from = m.chat
+        const isMedia = /image|video|sticker|audio/.test(m.quoted ? m.quoted.mtype : m.mtype)
+        const isVideo = (m.quoted ? m.quoted.mtype : m.mtype) == 'videoMessage'
+        const isImage = (m.quoted ? m.quoted.mtype : m.mtype) == 'imageMessage'
         const pushname = m.pushName || "No Name"
         const botNumber = await danzz.decodeJid(danzz.user.id)
         const isOwner = [botNumber, ...global.owner].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
@@ -251,77 +258,120 @@ module.exports = danzz = async (danzz, m, store, chatUpdate) => {
 - wikimedia (query)
 - pinterest (query)
 
+*Convert*
+- toimg (sticker)
+- tourl (media)
+- sticker (media)
+- stickerwm (media)
+- smeme (media)
+- ttp (text)
+- attp (text)
+
 *Random*
 - couple
 - coffe
 
 *Text Pro*
-- 3dchristmas
-- 3ddeepsea
-- americanflag
-- 3dscifi
-- 3drainbow
-- 3dwaterpipe
-- halloweenskeleton
-- sketch
-- bluecircuit
-- space
-- metallic
-- fiction
-- greenhorror
-- transformer
-- berry
-- thunder
-- magma
-- 3dcrackedstone
-- 3dneonlight
-- impressiveglitch
-- naturalleaves
-- fireworksparkle
-- matrix
-- dropwater
-- harrypotter
-- foggywindow
-- neondevils
-- christmasholiday
-- 3dgradient
-- blackpink
-- gluetext
+- 3dchristmas (text)
+- 3ddeepsea (text)
+- americanflag (text)
+- 3dscifi (text)
+- 3drainbow (text)
+- 3dwaterpipe (text)
+- halloweenskeleton (text)
+- sketch (text)
+- bluecircuit (text)
+- space (text)
+- metallic (text)
+- fiction (text)
+- greenhorror (text)
+- transformer (text)
+- berry (text)
+- thunder (text)
+- magma (text)
+- 3dcrackedstone (text)
+- 3dneonlight (text)
+- impressiveglitch (text)
+- naturalleaves (text)
+- fireworksparkle (text)
+- matrix (text)
+- dropwater (text)
+- harrypotter (text)
+- foggywindow (text)
+- neondevils (text)
+- christmasholiday (text)
+- 3dgradient (text)
+- blackpink (text)
+- gluetext (text)
 
 *Photo Oxy*
-- shadow
-- romantic
-- smoke
-- burnpapper
-- naruto
-- lovemsg
-- grassmsg
-- lovetext
-- coffecup
-- butterfly
-- harrypotter
-- retrolol
+- shadow (text)
+- romantic (text)
+- smoke (text)
+- burnpapper (text)
+- naruto (text)
+- lovemsg (text)
+- grassmsg (text)
+- lovetext (text)
+- coffecup (text)
+- butterfly (text)
+- harrypotter (text)
+- retrolol (text)
 
 *Ephoto*
-- ffcover
-- crossfire
-- galaxy
-- glass
-- neon
-- beach
-- blackpink
-- igcertificate
-- ytcertificate
+- ffcover (text)
+- crossfire (text)
+- galaxy (text)
+- glass (text)
+- neon (text)
+- beach (text)
+- blackpink (text)
+- igcertificate (text)
+- ytcertificate (text)
 
 *Primbon*
-- artinama (name)
-- tafsirmimpi (dream)
+- nomorhoki (text)
+- artimimpi (text)
+- artinama (text)
+- ramaljodoh (text) | (text)
+- ramaljodohbali (text)
+- suamiistri (text)
+- ramalcinta (text)
+- cocoknama (text)
+- pasangan (text)
+- jadiannikah (text)
+- sifatusaha (text)
+- rezeki (text)
+- pekerjaan (text)
+- nasib (text)
+- penyakit (text)
+- tarot (text)
+- fengshui (text)
+- haribaik (text)
+- harisangar (text)
+- harisial (text)
+- nagahari (text)
+- arahrezeki (text)
+- peruntungan (text)
+- weton (text)
+- karakter (text)
+- keberuntungan (text)
+- memancing (text)
+- masasubur (text)
+- zodiak (text)
+- shio (text)
 
 *Islamic*
 - iqra (number)
 - hadits (hadits)
 - alquran (surah) (ayat)
 - tafsirsurah (surah)
+
+*Owner*
+- self
+- public
+- delete (chats)
+- broadcast (text)
 `
       	  let buttons = [
                     {buttonId: `rules`, buttonText: {displayText: 'Rules'}, type: 1},
@@ -474,6 +524,7 @@ let buttons = [
             // Downloader
             case 'play': case 'ytplay': {
                 if (!text) throw `Example : ${prefix + command} dj 30 detik`
+                m.reply(mess.wait)
                 let yts = require("yt-search")
                 let search = await yts(text)
                 let anu = search.videos[Math.floor(Math.random() * search.videos.length)]
@@ -505,6 +556,7 @@ Url : ${anu.url}`,
             case 'ytmp3': case 'ytaudio': {
                 let { yta } = require('./lib/y2mate')
                 if (!text) throw `Example : ${prefix + command} https://youtube.com/watch?v=PtFMh6Tccag%27 128kbps`
+                m.reply(mess.wait)
                 let quality = args[1] ? args[1] : '128kbps'
                 let media = await yta(text, quality)
                 if (media.filesize >= 100000) return m.reply('File Melebihi Batas '+util.format(media))
@@ -516,6 +568,7 @@ Url : ${anu.url}`,
             case 'ytmp4': case 'ytvideo': {
                 let { ytv } = require('./lib/y2mate')
                 if (!text) throw `Example : ${prefix + command} https://youtube.com/watch?v=PtFMh6Tccag%27 360p`
+                m.reply(mess.wait)
                 let quality = args[1] ? args[1] : '360p'
                 let media = await ytv(text, quality)
                 if (media.filesize >= 100000) return m.reply('File Melebihi Batas '+util.format(media))
@@ -657,30 +710,35 @@ Url : ${anu.url}`,
             
             // Asupan
             case 'randomasupan': {
+            m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/asupan/random?apikey=danzzprem`)
 			danzz.sendMessage(m.chat, {video: yy, mimetype: 'video/mp4'}, {quoted:m})
 			}
 			break
 			
 			case 'santuy': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/asupan/santuy?apikey=danzz`)
 			danzz.sendMessage(m.chat, {video: yy, mimetype: 'video/mp4'}, {quoted:m})
 			}
 			break
 			
 			case 'bocil': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/asupan/bocil?apikey=danzz`)
 			danzz.sendMessage(m.chat, {video: yy, mimetype: 'video/mp4'}, {quoted:m})
 			}
 			break
 			
 			case 'hijaber': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/asupan/hijaber?apikey=danzz`)
 			danzz.sendMessage(m.chat, {video: yy, mimetype: 'video/mp4'}, {quoted:m})
 			}
 			break
 			
 			case 'ukhty': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/asupan/ukhty?apikey=danzz`)
 			danzz.sendMessage(m.chat, {video: yy, mimetype: 'video/mp4'}, {quoted:m})
 			}
@@ -688,42 +746,56 @@ Url : ${anu.url}`,
 			
 			// Cecan
 			case 'randomcecan': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/random?apikey=danzzprem`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
 			break
 			
 			case 'hijaber': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/hijaber?apikey=danzz`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
 			break
 			
 			case 'china': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/china?apikey=danzzprem`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
 			break
 			
+			case 'indonesia': {
+			m.reply(mess.wait)
+			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/indonesia?apikey=danzz`)
+			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
+			}
+			break
+			
 			case 'korea': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/korea?apikey=danzz`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
 			break
 			
 			case 'japan': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/japan?apikey=danzz`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
 			break
 			
 			case 'thailand': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/thailand?apikey=danzzprem`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
 			break
 			
 			case 'vietnam': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cecan/vietnam?apikey=danzzprem`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
@@ -731,6 +803,7 @@ Url : ${anu.url}`,
 			
 			// Cogan
 			case 'randomcogan': {
+			m.reply(mess.wait)
 			yy = await getBuffer(`https://danzzapi.xyz/api/cogan/random?apikey=danzz`)
 			danzz.sendMessage(m.chat, {image: yy, mimetype: 'image/png'}, {quoted:m})
 			}
@@ -738,7 +811,8 @@ Url : ${anu.url}`,
 			
 			// search
 			case 'yts': case 'ytsearch': {
-                if (!text) throw `Example : ${prefix + command} story wa anime`
+                if (!text) throw `Example : ${prefix + command} story wa programmer`
+                m.reply(mess.wait)
                 let yts = require("yt-search")
                 let search = await yts(text)
                 let teks = 'YouTube Search\n\n Result From '+text+'\n\n'
@@ -752,6 +826,7 @@ Url : ${anu.url}`,
             
         case 'google': {
                 if (!text) throw `Example : ${prefix + command} Danzz Coding`
+                m.reply(mess.wait)
                 let google = require('google-it')
                 google({'query': text}).then(res => {
                 let teks = `Google Search From : ${text}\n\n`
@@ -767,6 +842,7 @@ Url : ${anu.url}`,
                 
         case 'gimage': {
         if (!text) throw `Example : ${prefix + command} kaori cicak`
+        m.reply(mess.wait)
         let gis = require('g-i-s')
         gis(text, async (error, result) => {
         n = result
@@ -790,6 +866,7 @@ Url : ${anu.url}`,
         
 			case 'playstore': {
             if (!text) throw `Example : ${prefix + command} pou`
+            m.reply(mess.wait)
             let res = await fetchJson(api('zenz', '/webzone/playstore', { query: text }, 'apikey'))
             let teks = ` Playstore Search From : ${text}\n\n`
             for (let i of res.result) {
@@ -804,6 +881,7 @@ Url : ${anu.url}`,
             
             case 'gsmarena': {
             if (!text) throw `Example : ${prefix + command} samsung j4+`
+            m.reply(mess.wait)
             let res = await fetchJson(api('zenz', '/webzone/gsmarena', { query: text }, 'apikey'))
             let { judul, rilis, thumb, ukuran, type, storage, display, inchi, pixel, videoPixel, ram, chipset, batrai, merek_batre, detail } = res.result
 let capt = ` Title: ${judul}
@@ -826,6 +904,7 @@ let capt = ` Title: ${judul}
             
             case 'wallpaper': {
                 if (!text) throw 'Masukkan Query Title'
+                m.reply(mess.wait)
 				let { wallpaper } = require('./lib/scraper')
                 anu = await wallpaper(text)
                 result = anu[Math.floor(Math.random() * anu.length)]
@@ -845,6 +924,7 @@ let capt = ` Title: ${judul}
             
             case 'wikimedia': {
                 if (!text) throw 'Masukkan Query Title'
+                m.reply(mess.wait)
 				let { wikimedia } = require('./lib/scraper')
                 anu = await wikimedia(text)
                 result = anu[Math.floor(Math.random() * anu.length)]
@@ -872,6 +952,98 @@ let capt = ` Title: ${judul}
             }
             break
             
+        // Convert       
+		case 'toimage': case 'toimg': {
+                if (!/webp/.test(mime)) throw `Reply sticker dengan caption *${prefix + command}*`
+                m.reply(mess.wait)
+                let media = await danzz.downloadAndSaveMediaMessage(qmsg)
+                let ran = await getRandom('.png')
+                exec(`ffmpeg -i ${media} ${ran}`, (err) => {
+                    fs.unlinkSync(media)
+                    if (err) throw err
+                    let buffer = fs.readFileSync(ran)
+                    danzz.sendMessage(m.chat, { image: buffer }, { quoted: m })
+                    fs.unlinkSync(ran)
+                })
+            }
+            break
+            
+            case 'tourl': {
+                m.reply(mess.wait)
+		let { UploadFileUgu, webp2mp4File, TelegraPh } = require('./lib/uploader')
+                let media = await danzz.downloadAndSaveMediaMessage(qmsg)
+                if (/image/.test(mime)) {
+                    let anu = await TelegraPh(media)
+                    m.reply(util.format(anu))
+                } else if (!/image/.test(mime)) {
+                    let anu = await UploadFileUgu(media)
+                    m.reply(util.format(anu))
+                }
+                await fs.unlinkSync(media)
+            }
+            break
+            
+            case 'sticker': case 's': case 'stickergif': case 'sgif': {
+           if (/image/.test(mime)) {
+           m.reply(mess.wait)
+                let media = await danzz.downloadMediaMessage(qmsg)
+                let encmedia = await danzz.sendImageAsSticker(m.chat, media, m, { packname: global.packname, author: global.author })
+                await fs.unlinkSync(encmedia)
+            } else if (/video/.test(mime)) {
+            m.reply(mess.wait)
+                if (qmsg.seconds > 11) return m.reply('Maksimal 10 detik!')
+                let media = await danzz.downloadMediaMessage(qmsg)
+                let encmedia = await danzz.sendVideoAsSticker(m.chat, media, m, { packname: global.packname, author: global.author })
+                await fs.unlinkSync(encmedia)
+            } else {
+                m.reply(`Kirim/reply gambar/video/gif dengan caption ${prefix + command}\nDurasi Video/Gif 1-9 Detik`)
+                }
+            }
+            break
+            
+            case 'stickerwm': case 'swm': case 'stickergifwm': case 'sgifwm': {
+                let [teks1, teks2] = text.split`|`
+                if (!teks1) throw `Kirim/reply image/video dengan caption ${prefix + command} teks1|teks2`
+                if (!teks2) throw `Kirim/reply image/video dengan caption ${prefix + command} teks1|teks2`
+            	m.reply(mess.wait)
+                if (/image/.test(mime)) {
+                    let media = await danzz.downloadMediaMessage(qmsg)
+                    let encmedia = await danzz.sendImageAsSticker(m.chat, media, m, { packname: teks1, author: teks2 })
+                    await fs.unlinkSync(encmedia)
+                } else if (/video/.test(mime)) {
+                    if ((quoted.msg || quoted).seconds > 11) return m.reply('Maksimal 10 detik!')
+                    let media = await danzz.downloadMediaMessage(qmsg)
+                    let encmedia = await danzz.sendVideoAsSticker(m.chat, media, m, { packname: teks1, author: teks2 })
+                    await fs.unlinkSync(encmedia)
+                } else {
+                    throw `Kirim Gambar/Video Dengan Caption ${prefix + command}\nDurasi Video 1-9 Detik`
+                }
+            }
+            break
+            
+            case 'smeme': case 'stickmeme': case 'stikmeme': case 'stickermeme': case 'stikermeme': {
+	        let respond = `Kirim/reply image/sticker dengan caption ${prefix + command} text1|text2`
+	        if (!/image/.test(mime)) throw respond
+            if (!text) throw respond
+	        m.reply(mess.wait)
+            atas = text.split('|')[0] ? text.split('|')[0] : '-'
+            bawah = text.split('|')[1] ? text.split('|')[1] : '-'
+	        let dwnld = await danzz.downloadMediaMessage(qmsg)
+	        let { floNime } = require('./lib/uploader')
+	        let fatGans = await floNime(dwnld)
+	        let smeme = `https://api.memegen.link/images/custom/${encodeURIComponent(atas)}/${encodeURIComponent(bawah)}.png?background=${fatGans.result.url}`
+	        let daniganteng = await danzz.sendImageAsSticker(m.chat, smeme, m, { packname: global.packname, author: global.auhor })
+	        await fs.unlinkSync(daniganteng)
+            }
+	       break
+            
+		case 'attp': case 'ttp': {
+			m.reply(mess.wait)
+            if (!text) throw `Example : ${prefix + command} text`
+            await danzz.sendMedia(m.chat, `https://danzzapi.xyz/api/maker/${command}?text=${text}&apikey=danzz`, 'danzz', 'coding', m, {asSticker: true})
+            }
+            break
+            
             // Random
             case 'couple': {
                 m.reply(mess.wait)
@@ -881,7 +1053,8 @@ let capt = ` Title: ${judul}
                 danzz.sendMessage(m.chat, { image: { url: random.female }, caption: `Couple Female` }, { quoted: m })
             }
 	    break
-            case 'coffe': case 'kopi': {
+        case 'coffe': case 'kopi': {
+            m.reply(mess.wait)
             let buttons = [
                     {buttonId: `coffe`, buttonText: {displayText: 'Next Image'}, type: 1}
                 ]
@@ -906,7 +1079,7 @@ let capt = ` Title: ${judul}
             
             // Photo Oxy
             case 'shadow': case 'romantic': case 'smoke': case 'burnpapper': case 'naruto': case 'lovemsg': case 'grassmsg': case 'lovetext': case 'coffecup': case 'butterfly': case 'harrypotter': case 'retrolol': {
-                if (!text) throw 'No Query Text'
+                if (!text) throw `Example : ${prefix + command} text`
                 m.reply(mess.wait)
                 danzz.sendMessage(m.chat, { image: { url: api('zenz', '/photooxy/' + command, { text: text }, 'apikey') }, caption: `Photo Oxy ${command}` }, { quoted: m })
             }
@@ -914,24 +1087,274 @@ let capt = ` Title: ${judul}
 
             // Ephoto
             case 'ffcover': case 'crossfire': case 'galaxy': case 'glass': case 'neon': case 'beach': case 'blackpink': case 'igcertificate': case 'ytcertificate': {
-                if (!text) throw 'No Query Text'
+                if (!text) throw `Example : ${prefix + command} text`
                 m.reply(mess.wait)
                 danzz.sendMessage(m.chat, { image: { url: api('zenz', '/ephoto/' + command, { text: text }, 'apikey') }, caption: `Ephoto ${command}` }, { quoted: m })
             }
             break
             
             // Primbon
-            case 'artinama': {
-                if (!text) throw `Example : ${prefix + command} Dani`
-                let anu = await fetchJson(`https://danzzapi.xyz/api/primbon/artinama?name=${text}&apikey=danzz`)
-                danzz.sendText(m.chat, `${anu.result}`, m)
+            case 'nomerhoki': case 'nomorhoki': {
+                if (!Number(text)) throw `Example : ${prefix + command} 6288292024190`
+                let anu = await primbon.nomer_hoki(Number(text))
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nomor HP :* ${anu.message.nomer_hp}\n *Angka Shuzi :* ${anu.message.angka_shuzi}\n *Energi Positif :*\n- Kekayaan : ${anu.message.energi_positif.kekayaan}\n- Kesehatan : ${anu.message.energi_positif.kesehatan}\n- Cinta : ${anu.message.energi_positif.cinta}\n- Kestabilan : ${anu.message.energi_positif.kestabilan}\n- Persentase : ${anu.message.energi_positif.persentase}\n *Energi Negatif :*\n- Perselisihan : ${anu.message.energi_negatif.perselisihan}\n- Kehilangan : ${anu.message.energi_negatif.kehilangan}\n- Malapetaka : ${anu.message.energi_negatif.malapetaka}\n- Kehancuran : ${anu.message.energi_negatif.kehancuran}\n- Persentase : ${anu.message.energi_negatif.persentase}`, m)
             }
             break
-            
             case 'artimimpi': case 'tafsirmimpi': {
-            	if (!text) throw `Example : ${prefix + command} Basah`
-                let dream = await fetchJson(`https://danzzapi.xyz/api/primbon/tafsirmimpi?dream=${text}&apikey=danzz`)
-                danzz.sendText(m.chat, `${dream.result}`, m)
+                if (!text) throw `Example : ${prefix + command} belanja`
+                let anu = await primbon.tafsir_mimpi(text)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Mimpi :* ${anu.message.mimpi}\n *Arti :* ${anu.message.arti}\n *Solusi :* ${anu.message.solusi}`, m)
+            }
+            break
+            case 'ramalanjodoh': case 'ramaljodoh': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006, Nia, 1, 5, 2008`
+                let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+                let anu = await primbon.ramalan_jodoh(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama Anda :* ${anu.message.nama_anda.nama}\n *Lahir Anda :* ${anu.message.nama_anda.tgl_lahir}\n *Nama Pasangan :* ${anu.message.nama_pasangan.nama}\n *Lahir Pasangan :* ${anu.message.nama_pasangan.tgl_lahir}\n *Hasil :* ${anu.message.result}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'ramalanjodohbali': case 'ramaljodohbali': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006, Nia, 1, 5, 2008`
+                let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+                let anu = await primbon.ramalan_jodoh_bali(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama Anda :* ${anu.message.nama_anda.nama}\n *Lahir Anda :* ${anu.message.nama_anda.tgl_lahir}\n *Nama Pasangan :* ${anu.message.nama_pasangan.nama}\n *Lahir Pasangan :* ${anu.message.nama_pasangan.tgl_lahir}\n *Hasil :* ${anu.message.result}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'suamiistri': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006, Nia, 1, 5, 2008`
+                let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+                let anu = await primbon.suami_istri(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama Suami :* ${anu.message.suami.nama}\n *Lahir Suami :* ${anu.message.suami.tgl_lahir}\n *Nama Istri :* ${anu.message.istri.nama}\n *Lahir Istri :* ${anu.message.istri.tgl_lahir}\n *Hasil :* ${anu.message.result}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'ramalancinta': case 'ramalcinta': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006, Nia, 1, 5, 2008`
+                let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+                let anu = await primbon.ramalan_cinta(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama Anda :* ${anu.message.nama_anda.nama}\n *Lahir Anda :* ${anu.message.nama_anda.tgl_lahir}\n *Nama Pasangan :* ${anu.message.nama_pasangan.nama}\n *Lahir Pasangan :* ${anu.message.nama_pasangan.tgl_lahir}\n *Sisi Positif :* ${anu.message.sisi_positif}\n *Sisi Negatif :* ${anu.message.sisi_negatif}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'artinama': {
+                if (!text) throw `Example : ${prefix + command} Dika Ardianta`
+                let anu = await primbon.arti_nama(text)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama :* ${anu.message.nama}\n *Arti :* ${anu.message.arti}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'kecocokannama': case 'cocoknama': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006`
+                let [nama, tgl, bln, thn] = text.split`,`
+                let anu = await primbon.kecocokan_nama(nama, tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama :* ${anu.message.nama}\n *Lahir :* ${anu.message.tgl_lahir}\n *Life Path :* ${anu.message.life_path}\n *Destiny :* ${anu.message.destiny}\n *Destiny Desire :* ${anu.message.destiny_desire}\n *Personality :* ${anu.message.personality}\n *Persentase :* ${anu.message.persentase_kecocokan}`, m)
+            }
+            break
+            case 'kecocokanpasangan': case 'cocokpasangan': case 'pasangan': {
+                if (!text) throw `Example : ${prefix + command} Dani|Nia`
+                let [nama1, nama2] = text.split`|`
+                let anu = await primbon.kecocokan_nama_pasangan(nama1, nama2)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendImage(m.chat,  anu.message.gambar, ` *Nama Anda :* ${anu.message.nama_anda}\n *Nama Pasangan :* ${anu.message.nama_pasangan}\n *Sisi Positif :* ${anu.message.sisi_positif}\n *Sisi Negatif :* ${anu.message.sisi_negatif}`, m)
+            }
+            break
+            case 'jadianpernikahan': case 'jadiannikah': {
+                if (!text) throw `Example : ${prefix + command} 6, 12, 2020`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.tanggal_jadian_pernikahan(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Tanggal Pernikahan :* ${anu.message.tanggal}\n *karakteristik :* ${anu.message.karakteristik}`, m)
+            }
+            break
+            case 'sifatusaha': {
+                if (!ext)throw `Example : ${prefix+ command} 28, 12, 2021`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.sifat_usaha_bisnis(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Lahir :* ${anu.message.hari_lahir}\n *Usaha :* ${anu.message.usaha}`, m)
+            }
+            break
+            case 'rejeki': case 'rezeki': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.rejeki_hoki_weton(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Lahir :* ${anu.message.hari_lahir}\n *Rezeki :* ${anu.message.rejeki}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'pekerjaan': case 'kerja': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.pekerjaan_weton_lahir(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Lahir :* ${anu.message.hari_lahir}\n *Pekerjaan :* ${anu.message.pekerjaan}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'ramalannasib': case 'ramalnasib': case 'nasib': {
+                if (!text) throw `Example : 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.ramalan_nasib(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Analisa :* ${anu.message.analisa}\n *Angka Akar :* ${anu.message.angka_akar}\n *Sifat :* ${anu.message.sifat}\n *Elemen :* ${anu.message.elemen}\n *Angka Keberuntungan :* ${anu.message.angka_keberuntungan}`, m)
+            }
+            break
+            case 'potensipenyakit': case 'penyakit': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.cek_potensi_penyakit(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Analisa :* ${anu.message.analisa}\n *Sektor :* ${anu.message.sektor}\n *Elemen :* ${anu.message.elemen}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'artitarot': case 'tarot': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.arti_kartu_tarot(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendImage(m.chat, anu.message.image, ` *Lahir :* ${anu.message.tgl_lahir}\n *Simbol Tarot :* ${anu.message.simbol_tarot}\n *Arti :* ${anu.message.arti}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'fengshui': {
+                if (!text) throw `Example : ${prefix + command} Dika, 1, 2005\n\nNote : ${prefix + command} Nama, gender, tahun lahir\nGender : 1 untuk laki-laki & 2 untuk perempuan`
+                let [nama, gender, tahun] = text.split`,`
+                let anu = await primbon.perhitungan_feng_shui(nama, gender, tahun)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama :* ${anu.message.nama}\n *Lahir :* ${anu.message.tahun_lahir}\n *Gender :* ${anu.message.jenis_kelamin}\n *Angka Kua :* ${anu.message.angka_kua}\n *Kelompok :* ${anu.message.kelompok}\n *Karakter :* ${anu.message.karakter}\n *Sektor Baik :* ${anu.message.sektor_baik}\n *Sektor Buruk :* ${anu.message.sektor_buruk}`, m)
+            }
+            break
+            case 'haribaik': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.petung_hari_baik(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Lahir :* ${anu.message.tgl_lahir}\n *Kala Tinantang :* ${anu.message.kala_tinantang}\n *Info :* ${anu.message.info}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'harisangar': case 'taliwangke': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.hari_sangar_taliwangke(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Lahir :* ${anu.message.tgl_lahir}\n *Hasil :* ${anu.message.result}\n *Info :* ${anu.message.info}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'harinaas': case 'harisial': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.primbon_hari_naas(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Hari Lahir :* ${anu.message.hari_lahir}\n *Tanggal Lahir :* ${anu.message.tgl_lahir}\n *Hari Naas :* ${anu.message.hari_naas}\n *Info :* ${anu.message.catatan}\n *Catatan :* ${anu.message.info}`, m)
+            }
+            break
+            case 'nagahari': case 'harinaga': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.rahasia_naga_hari(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Hari Lahir :* ${anu.message.hari_lahir}\n *Tanggal Lahir :* ${anu.message.tgl_lahir}\n *Arah Naga Hari :* ${anu.message.arah_naga_hari}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'arahrejeki': case 'arahrezeki': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.primbon_arah_rejeki(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Hari Lahir :* ${anu.message.hari_lahir}\n *tanggal Lahir :* ${anu.message.tgl_lahir}\n *Arah Rezeki :* ${anu.message.arah_rejeki}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'peruntungan': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006, 2022\n\nNote : ${prefix + command} Nama, tanggal lahir, bulan lahir, tahun lahir, untuk tahun`
+                let [nama, tgl, bln, thn, untuk] = text.split`,`
+                let anu = await primbon.ramalan_peruntungan(nama, tgl, bln, thn, untuk)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama :* ${anu.message.nama}\n *Lahir :* ${anu.message.tgl_lahir}\n *Peruntungan Tahun :* ${anu.message.peruntungan_tahun}\n *Hasil :* ${anu.message.result}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'weton': case 'wetonjawa': {
+                if (!text) throw `Example : ${prefix + command} 31, 8, 2006`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.weton_jawa(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Tanggal :* ${anu.message.tanggal}\n *Jumlah Neptu :* ${anu.message.jumlah_neptu}\n *Watak Hari :* ${anu.message.watak_hari}\n *Naga Hari :* ${anu.message.naga_hari}\n *Jam Baik :* ${anu.message.jam_baik}\n *Watak Kelahiran :* ${anu.message.watak_kelahiran}`, m)
+            }
+            break
+            case 'sifat': case 'karakter': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006`
+                let [nama, tgl, bln, thn] = text.split`,`
+                let anu = await primbon.sifat_karakter_tanggal_lahir(nama, tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama :* ${anu.message.nama}\n *Lahir :* ${anu.message.tgl_lahir}\n *Garis Hidup :* ${anu.message.garis_hidup}`, m)
+            }
+            break
+            case 'keberuntungan': {
+                if (!text) throw `Example : ${prefix + command} Dani, 31, 8, 2006`
+                let [nama, tgl, bln, thn] = text.split`,`
+                let anu = await primbon.potensi_keberuntungan(nama, tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Nama :* ${anu.message.nama}\n *Lahir :* ${anu.message.tgl_lahir}\n *Hasil :* ${anu.message.result}`, m)
+            }
+            break
+            case 'memancing': {
+                if (!text) throw `Example : ${prefix + command} 10, 10, 2022`
+                let [tgl, bln, thn] = text.split`,`
+                let anu = await primbon.primbon_memancing_ikan(tgl, bln, thn)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Tanggal :* ${anu.message.tgl_memancing}\n *Hasil :* ${anu.message.result}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'masasubur': {
+                if (!text) throw `Example : ${prefix + command} 10, 10, 2022, 28\n\nNote : ${prefix + command} hari pertama menstruasi, siklus`
+                let [tgl, bln, thn, siklus] = text.split`,`
+                let anu = await primbon.masa_subur(tgl, bln, thn, siklus)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Hasil :* ${anu.message.result}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'zodiak': case 'zodiac': {
+                if (!text) throw `Example : ${prefix+ command} 31 8 2006`
+                let zodiak = [
+                    ["capricorn", new Date(1970, 0, 1)],
+                    ["aquarius", new Date(1970, 0, 20)],
+                    ["pisces", new Date(1970, 1, 19)],
+                    ["aries", new Date(1970, 2, 21)],
+                    ["taurus", new Date(1970, 3, 21)],
+                    ["gemini", new Date(1970, 4, 21)],
+                    ["cancer", new Date(1970, 5, 22)],
+                    ["leo", new Date(1970, 6, 23)],
+                    ["virgo", new Date(1970, 7, 23)],
+                    ["libra", new Date(1970, 8, 23)],
+                    ["scorpio", new Date(1970, 9, 23)],
+                    ["sagittarius", new Date(1970, 10, 22)],
+                    ["capricorn", new Date(1970, 11, 22)]
+                ].reverse()
+
+                function getZodiac(month, day) {
+                    let d = new Date(1970, month - 1, day)
+                    return zodiak.find(([_,_d]) => d >= _d)[0]
+                }
+                let date = new Date(text)
+                if (date == 'Invalid Date') throw date
+                let d = new Date()
+                let [tahun, bulan, tanggal] = [d.getFullYear(), d.getMonth() + 1, d.getDate()]
+                let birth = [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+
+                let zodiac = await getZodiac(birth[1], birth[2])
+                
+                let anu = await primbon.zodiak(zodiac)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Zodiak :* ${anu.message.zodiak}\n *Nomor :* ${anu.message.nomor_keberuntungan}\n *Aroma :* ${anu.message.aroma_keberuntungan}\n *Planet :* ${anu.message.planet_yang_mengitari}\n *Bunga :* ${anu.message.bunga_keberuntungan}\n *Warna :* ${anu.message.warna_keberuntungan}\n *Batu :* ${anu.message.batu_keberuntungan}\n *Elemen :* ${anu.message.elemen_keberuntungan}\n *Pasangan Zodiak :* ${anu.message.pasangan_zodiak}\n *Catatan :* ${anu.message.catatan}`, m)
+            }
+            break
+            case 'shio': {
+                if (!text) throw `Example : ${prefix + command} tikus\n\nNote : For Detail https://primbon.com/shio.htm`
+                let anu = await primbon.shio(text)
+                if (anu.status == false) return m.reply(anu.message)
+                danzz.sendText(m.chat, ` *Hasil :* ${anu.message}`, m)
             }
             break
             
@@ -939,6 +1362,7 @@ let capt = ` Title: ${judul}
             case 'iqra': {
 		oh = `Example : ${prefix + command} 3\n\nIQRA Yang tersedia : 1,2,3,4,5,6`
 		if (!text) throw oh
+		m.reply(mess.wait)
 		yy = await getBuffer(`https://islamic-api-indonesia.herokuapp.com/api/data/pdf/iqra${text}`)
 		danzz.sendMessage(m.chat, {document: yy, mimetype: 'application/pdf', fileName: `iqra${text}.pdf`}, {quoted:m}).catch ((err) => m.reply(oh))
 		}
@@ -969,6 +1393,7 @@ malik
 muslim
 1 - 5362`
 		if (!args[1]) throw `Hadis yang ke berapa?\n\ncontoh:\n${prefix + command} muslim 1`
+		m.reply(mess.wait)
 		try {
 		let res = await fetchJson(`https://fatiharridho.herokuapp.com/api/islamic/hadits?list=${args[0]}`)
 		let { number, arab, id } = res.result.find(v => v.number == args[1])
@@ -986,6 +1411,7 @@ ${id}`)
 		case 'alquran': {
 		if (!args[0]) throw `Contoh penggunaan:\n${prefix + command} 1 2\n\nmaka hasilnya adalah surah Al-Fatihah ayat 2 beserta audionya, dan ayatnya 1 aja`
 		if (!args[1]) throw `Contoh penggunaan:\n${prefix + command} 1 2\n\nmaka hasilnya adalah surah Al-Fatihah ayat 2 beserta audionya, dan ayatnya 1 aja`
+		m.reply(mess.wait)
 		let res = await fetchJson(`https://islamic-api-indonesia.herokuapp.com/api/data/quran?surah=${args[0]}&ayat=${args[1]}`)
 		let txt = `*Arab* : ${res.result.data.text.arab}
 *English* : ${res.result.data.translation.en}
@@ -1000,6 +1426,7 @@ ${id}`)
 		case 'tafsirsurah': {
 		if (!args[0]) throw `Contoh penggunaan:\n${prefix + command} 1 2\n\nmaka hasilnya adalah tafsir surah Al-Fatihah ayat 2`
 		if (!args[1]) throw `Contoh penggunaan:\n${prefix + command} 1 2\n\nmaka hasilnya adalah tafsir surah Al-Fatihah ayat 2`
+		m.reply(mess.wait)
 		let res = await fetchJson(`https://islamic-api-indonesia.herokuapp.com/api/data/quran?surah=${args[0]}&ayat=${args[1]}`)
 		let txt = ` *Tafsir Surah*  
 
@@ -1011,6 +1438,64 @@ ${id}`)
 		m.reply(txt)
 		}
 		break
+		
+		// Owner
+		case 'self': {
+                if (!isOwner) throw mess.owner
+                danzz.public = false
+                m.reply('Self Mode Activate')
+            }
+            break
+            
+            case 'public': {
+                if (!isOwner) throw mess.owner
+                danzz.public = true
+                m.reply('Public Mode Activate')
+            }
+            break
+            
+            case 'delete': case 'del': {
+                if (!m.quoted) throw false
+                let { chat, fromMe, id, isBaileys } = m.quoted
+                if (!isBaileys) throw 'Pesan tersebut bukan dikirim oleh bot!'
+                danzz.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: true, id: m.quoted.id, participant: m.quoted.sender } })
+            }
+            break
+            
+            case 'bc': case 'broadcast': case 'bcall': {
+                if (!isOwner) throw mess.owner
+                if (!text) throw `Text mana?\n\nExample : ${prefix + command} fatih-san`
+                let anu = await store.chats.all().map(v => v.id)
+                m.reply(`Mengirim Broadcast Ke ${anu.length} Chat\nWaktu Selesai ${anu.length * 1.5} detik`)
+		for (let yoi of anu) {
+		    await sleep(1500)
+		    let btn = [{
+                                urlButton: {
+                                    displayText: 'My Website',
+                                    url: 'https://danzzcodingweb.vercel.app'
+                                }
+                            }, {
+                                urlButton: {
+                                    displayText: 'My RestAPI',
+                                    url: 'https://danzzapi.xyz'
+                                }
+                            }, {
+                                quickReplyButton: {
+                                    displayText: 'Menu',
+                                    id: 'menu'
+                                }
+                            }, {
+                                quickReplyButton: {
+                                    displayText: 'Owner',
+                                    id: 'owner'
+                                }
+                            }]
+                      let txt = ` Broadcast Bot \n\n${text}`
+                      danzz.send5ButImg(yoi, txt, danzz.user.name, global.thumb, btn)
+		}
+		m.reply('Sukses Broadcast')
+            }
+            break
 		
 		// End Case
 		default:
