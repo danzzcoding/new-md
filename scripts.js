@@ -129,7 +129,7 @@ module.exports = danzz = async (danzz, m, store, chatUpdate) => {
         let isgclink = isLinkThisGc.test(m.text)
         if (isgclink) return m.reply(`Ngapain Lu Ngirim Link Group Ini?`)
         if (isAdmins) return m.reply(`Admin Mah Bebas Yakan?`)
-        if (isCreator) return m.reply(`Owner Bot Mah Bebas Yakan?`)
+        if (isOwner) return m.reply(`Owner Bot Mah Bebas Yakan?`)
         m.reply(`[ *ANTI LINK* ]\n\nKamu Terdeteksi Mengirim Link Grup, Kamu Akan Di Kick!!!`)
         danzz.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
         }
@@ -1104,7 +1104,7 @@ ${id}`)
 		// End Case
 		default:
                 if (budy.startsWith('=>')) {
-                    if (!isCreator) return m.reply(mess.owner)
+                    if (!isOwner) return m.reply(mess.owner)
                     function Return(sul) {
                         sat = JSON.stringify(sul, null, 2)
                         bang = util.format(sat)
@@ -1121,7 +1121,7 @@ ${id}`)
                 }
 
                 if (budy.startsWith('>')) {
-                    if (!isCreator) return m.reply(mess.owner)
+                    if (!isOwner) return m.reply(mess.owner)
                     try {
                         let evaled = await eval(budy.slice(2))
                         if (typeof evaled !== 'string') evaled = require('util').inspect(evaled)
@@ -1132,7 +1132,7 @@ ${id}`)
                 }
 
                 if (budy.startsWith('$')) {
-                    if (!isCreator) return m.reply(mess.owner)
+                    if (!isOwner) return m.reply(mess.owner)
                     exec(budy.slice(2), (err, stdout) => {
                         if (err) return m.reply(`${err}`)
                         if (stdout) return m.reply(stdout)
