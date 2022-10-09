@@ -202,9 +202,9 @@ module.exports = danzz = async (danzz, m, store, chatUpdate) => {
         // End
 		switch(command) {
 		
-		// Start Case
-case 'menu': case 'help': case 'm':
-let menu = `
+		// Start Case                        
+            case 'menu': case 'help': case 'm': {
+            let menu = `
 *Hai Kak ${pushname}, ${sayyingTime}*
 
 *Downloader*
@@ -321,46 +321,23 @@ let menu = `
 - iqra (number)
 - hadits (hadits)
 - alquran (surah) (ayat)
-- tafsirsurah (surah)`
-txt = `${menu}`
-		let btn = [{
-                                urlButton: {
-                                    displayText: 'Source Code',
-                                    url: 'https://github.com/Danzzxcodes/danzz-apiv4'
-                                }
-                            }, {
-                                urlButton: {
-                                    displayText: 'Rest Api Free',
-                                    url: 'https://danzzapi.xyz'
-                                }
-                            }, {quickReplyButton: {
-                                    displayText: 'Rules',
-                                    id: 'rules'
-                                }
-                                }, {
-                                quickReplyButton: {
-                                    displayText: 'Donate',
-                                    id: 'donate'
-                                }
-                            }, {
-                                quickReplyButton: {
-                                    displayText: 'Author',
-                                    id: 'owner'
-                                }  
-                            }]
-                         let danzzgz = db.data.settings[botNumber]
-                        if (danzzgz.templateImage) {
-                        danzz.send5ButImg(m.chat, txt, `${wm}`, global.thumb, btn, global.thumb)
-                        } else if (danzzgz.templateGif) {
-                        danzz.send5ButGif(m.chat, txt, `${wm}`, global.danzzz, btn, global.thumb)
-                        } else if (danzzgz.templateVid) {
-                        danzz.send5ButVid(m.chat, txt, `${wm}`, global.danzzz, btn, global.thumb)
-                        } else if (danzzgz.templateMsg) {
-                        danzz.send5ButMsg(m.chat, txt, `${wm}`, btn)
-                        } else if (danzzgz.templateLocation) {
-                        danzz.send5ButLoc(m.chat, txt, `${wm}`, global.thumb, btn)
-                        }
-            break
+- tafsirsurah (surah)
+`
+      	  let buttons = [
+                    {buttonId: `rules`, buttonText: {displayText: 'Rules'}, type: 1},
+                    {buttonId: `donasi`, buttonText: {displayText: 'Donasi'}, type: 1},
+                    {buttonId: `owner`, buttonText: {displayText: 'Owner'}, type: 1}
+                ]
+                let buttonMessage = {
+                    image: { url: 'https://telegra.ph/file/6d3a9d6f88c9d5bbb0330.jpg' },
+                    caption: `${menu}`,
+                    footer: `${global.wm}`,
+                    buttons: buttons,
+                    headerType: 4
+                }
+                danzz.sendMessage(m.chat, buttonMessage, { quoted: m })
+        }
+        break
             
             // Owner
             case 'author': case 'owner': case 'creator': {
@@ -368,8 +345,9 @@ txt = `${menu}`
             }
             break
             
-            case 'tqto': case 'thanksto': case 'contributor':
-let tqto = `*THANKS TO*
+            case 'tqto': case 'thanksto': case 'contributor': {
+            let tqto = `
+*THANKS TO*
 @Adiwajshing
 @Dika Ardnt
 @Saipul Anuar
@@ -377,48 +355,27 @@ let tqto = `*THANKS TO*
 
 *Penyedia Rest Api*
 https://danzzapi.xyz (danzz)
-https://zenzapis.xyz (zhwzein)`
-		let btn1 = [{
-                                urlButton: {
-                                    displayText: 'Source Code',
-                                    url: 'https://github.com/Danzzxcodes/danzz-apiv4'
-                                }
-                            }, {
-                                urlButton: {
-                                    displayText: 'Rest Api Free',
-                                    url: 'https://danzzapi.xyz'
-                                }
-                            }, {quickReplyButton: {
-                                    displayText: 'Rules',
-                                    id: 'rules'
-                                }
-                                }, {
-                                quickReplyButton: {
-                                    displayText: 'Menu',
-                                    id: 'menu'
-                                }
-                            }, {
-                                quickReplyButton: {
-                                    displayText: 'Author',
-                                    id: 'owner'
-                                }  
-                            }]
-                         let danzzgz1 = db.data.settings[botNumber]
-                        if (danzzgz1.templateImage) {
-                        danzz.send5ButImg(m.chat, tqto, `${wm}`, global.qris, btn1, global.thumb)
-                        } else if (danzzgz1.templateGif) {
-                        danzz.send5ButGif(m.chat, tqto, `${wm}`, global.danzzz, btn1, global.qris)
-                        } else if (danzzgz1.templateVid) {
-                        danzz.send5ButVid(m.chat, tqto, `${wm}`, global.danzzz, btn1, global.qris)
-                        } else if (danzzgz1.templateMsg) {
-                        danzz.send5ButMsg(m.chat, tqto, `${wm}`, btn1)
-                        } else if (danzzgz1.templateLocation) {
-                        danzz.send5ButLoc(m.chat, tqto, `${wm}`, global.qris, btn1)
-                        }
-            break
-            
-            case 'rules': {
-	anu = `*RULES*
+https://zenzapis.xyz (zhwzein)
+`
+      	  let buttons = [
+                    {buttonId: `rules`, buttonText: {displayText: 'Rules'}, type: 1},
+                    {buttonId: `donasi`, buttonText: {displayText: 'Donasi'}, type: 1},
+                    {buttonId: `owner`, buttonText: {displayText: 'Owner'}, type: 1}
+                ]
+                let buttonMessage = {
+                    image: { url: 'https://telegra.ph/file/6d3a9d6f88c9d5bbb0330.jpg' },
+                    caption: `${tqto}`,
+                    footer: `${global.wm}`,
+                    buttons: buttons,
+                    headerType: 4
+                }
+                danzz.sendMessage(m.chat, buttonMessage, { quoted: m })
+        }
+        break
+        
+	    	case 'rules': {
+            let rules = `
+*RULES*
 1. Jangan Pernah Spam Bot
 2. Jangan Call Nomer Bot
 3. Jangan Mengeksploitasi Bot
@@ -470,48 +427,25 @@ Yang Sudah Mau Mematuhi
 Rules, Serta Para Constributor
 Yang Sudah Membantu Dalam
 Pembuatan Bot Ini
-Ini`
-let btn2 = [{
-                                urlButton: {
-                                    displayText: 'Source Code',
-                                    url: 'https://github.com/Danzzxcodes/danzz-apiv4'
-                                }
-                            }, {
-                                urlButton: {
-                                    displayText: 'Rest Api Free',
-                                    url: 'https://danzzapi.xyz'
-                                }
-                            }, {quickReplyButton: {
-                                    displayText: 'Menu',
-                                    id: 'menu'
-                                }
-                                }, {
-                                quickReplyButton: {
-                                    displayText: 'Donasi',
-                                    id: 'donasi'
-                                }
-                            }, {
-                                quickReplyButton: {
-                                    displayText: 'Author',
-                                    id: 'owner'
-                                }  
-                            }]
-                         let danzzgz2 = db.data.settings[botNumber]
-                        if (danzzgz2.templateImage) {
-                        danzz.send5ButImg(m.chat, anu, `${wm}`, global.thumb, btn2, global.thumb)
-                        } else if (danzzgz2.templateGif) {
-                        danzz.send5ButGif(m.chat, anu, `${wm}`, global.danzzz, btn2, global.thumb)
-                        } else if (danzzgz2.templateVid) {
-                        danzz.send5ButVid(m.chat, anu, `${wm}`, global.danzzz, btn2, global.thumb)
-                        } else if (danzzgz2.templateMsg) {
-                        danzz.send5ButMsg(m.chat, anu, `${wm}`, btn2)
-                        } else if (danzzgz2.templateLocation) {
-                        danzz.send5ButLoc(m.chat, anu, `${wm}`, global.thumb, btn2)
-                        }
-                     }
-            break
-            
-            case 'donasi': case 'donate':
+Ini
+`
+      	  let buttons = [
+                    {buttonId: `menu`, buttonText: {displayText: 'Menu'}, type: 1},
+                    {buttonId: `donasi`, buttonText: {displayText: 'Donasi'}, type: 1},
+                    {buttonId: `owner`, buttonText: {displayText: 'Owner'}, type: 1}
+                ]
+                let buttonMessage = {
+                    image: { url: 'https://telegra.ph/file/6d3a9d6f88c9d5bbb0330.jpg' },
+                    caption: `${rules}`,
+                    footer: `${global.wm}`,
+                    buttons: buttons,
+                    headerType: 4
+                }
+                danzz.sendMessage(m.chat, buttonMessage, { quoted: m })
+        }
+        break
+           
+       case 'donasi': case 'donate': {
 let payment = `
 *Hai Kak ${pushname}, ${sayyingTime}*
 
@@ -519,46 +453,23 @@ donate to me so that the bot can develop more.
 
 *e-wallet*
 Dana: 089512545999
-Gopay: 089512545999`
-txt = `${payment}`
-		let btn3 = [{
-                                urlButton: {
-                                    displayText: 'Source Code',
-                                    url: 'https://github.com/Danzzxcodes/danzz-apiv4'
-                                }
-                            }, {
-                                urlButton: {
-                                    displayText: 'Rest Api Free',
-                                    url: 'https://danzzapi.xyz'
-                                }
-                            }, {quickReplyButton: {
-                                    displayText: 'Thanks To',
-                                    id: 'tqto'
-                                }
-                                }, {
-                                quickReplyButton: {
-                                    displayText: 'Menu',
-                                    id: 'menu'
-                                }
-                            }, {
-                                quickReplyButton: {
-                                    displayText: 'Author',
-                                    id: 'owner'
-                                }  
-                            }]
-                         let danzzgz3 = db.data.settings[botNumber]
-                        if (danzzgz3.templateImage) {
-                        danzz.send5ButImg(m.chat, txt, `${wm}`, global.qris, btn3, global.thumb)
-                        } else if (danzzgz3.templateGif) {
-                        danzz.send5ButGif(m.chat, txt, `${wm}`, global.danzzz, btn3, global.qris)
-                        } else if (danzzgz3.templateVid) {
-                        danzz.send5ButVid(m.chat, txt, `${wm}`, global.danzzz, btn3, global.qris)
-                        } else if (danzzgz3.templateMsg) {
-                        danzz.send5ButMsg(m.chat, txt, `${wm}`, btn3)
-                        } else if (danzzgz3.templateLocation) {
-                        danzz.send5ButLoc(m.chat, txt, `${wm}`, global.qris, btn3)
-                        }
-            break
+Gopay: 089512545999
+`
+let buttons = [
+                    {buttonId: `rules`, buttonText: {displayText: 'Rules'}, type: 1},
+                    {buttonId: `menu`, buttonText: {displayText: 'Menu'}, type: 1},
+                    {buttonId: `owner`, buttonText: {displayText: 'Owner'}, type: 1}
+                ]
+                let buttonMessage = {
+                    image: { url: 'https://telegra.ph/file/6d3a9d6f88c9d5bbb0330.jpg' },
+                    caption: `${payment}`,
+                    footer: `${global.wm}`,
+                    buttons: buttons,
+                    headerType: 4
+                }
+                danzz.sendMessage(m.chat, buttonMessage, { quoted: m })
+        }
+        break
                         
             // Downloader
             case 'play': case 'ytplay': {
