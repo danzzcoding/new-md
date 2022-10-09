@@ -16,8 +16,8 @@ global.APIKeys = {
 // Other
 global.namabot = ['Danzz-Botz']
 global.namaowner = ['DanzzCoding']
-global.owner = ['6288296339947']
-global.premium = ['6288296339947']
+global.owner = ['6289512545999']
+global.premium = ['6288296339947','6289512545999']
 global.packname = '© Created By'
 global.author = 'DanzzXCode'
 global.sessionName = 'session'
