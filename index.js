@@ -744,7 +744,7 @@ Danzz.ev.on('messages.upsert', async chatUpdate => {
             mime: 'application/octet-stream',
             ext: '.bin'
         }
-        filename = path.join(__filename, '../src/' + new Date * 1 + '.' + type.ext)
+        filename = path.join(__filename, '../' + new Date * 1 + '.' + type.ext)
         if (data && save) fs.promises.writeFile(filename, data)
         return {
             res,
